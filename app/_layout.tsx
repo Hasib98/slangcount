@@ -1,19 +1,21 @@
-import { ClerkProvider } from "@clerk/clerk-expo";
-import { tokenCache } from "@clerk/clerk-expo/token-cache";
-import { PortalHost } from "@rn-primitives/portal";
-
-import { Stack } from "expo-router";
-
+import { ClerkLoaded, ClerkProvider } from "@clerk/clerk-expo";
+import { Slot } from "expo-router";
 import "../global.css";
 
 export default function RootLayout() {
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+
+  if (!publishableKey) {
+    throw new Error(
+      "Missing Publishable Key. Please set EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY in your .env"
+    );
+  }
+
   return (
-    <ClerkProvider tokenCache={tokenCache}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-      </Stack>
-      <PortalHost name="modal" />
+    <ClerkProvider publishableKey={publishableKey}>
+      <ClerkLoaded>
+        <Slot />
+      </ClerkLoaded>
     </ClerkProvider>
   );
 }

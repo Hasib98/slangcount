@@ -9,7 +9,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const Index = () => {
   const router = useRouter();
   const handleGetStarted = () => {
-    router.navigate("/(auth)/sign-up");
+    router.navigate("/(auth)/sign-in");
   };
 
   return (
