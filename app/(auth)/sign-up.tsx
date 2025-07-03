@@ -1,8 +1,11 @@
 import { useClerkSignUp } from "@/hooks/useClerkSignUp";
+import { useSSO } from "@clerk/clerk-expo";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import * as AuthSession from "expo-auth-session";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import React from "react";
+import * as WebBrowser from "expo-web-browser";
+import React, { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -31,8 +34,10 @@ const SignUp = () => {
     error,
   } = useClerkSignUp();
 
-  const [name, setName] = React.useState("");
-  const [nameError, setNameError] = React.useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [oauthError, setOauthError] = useState<string | null>(null);
+  const { startSSOFlow } = useSSO();
 
   // Validate name before sign up
   const handleSignUp = () => {
@@ -43,6 +48,26 @@ const SignUp = () => {
     setNameError(null);
     onSignUpPress();
   };
+
+  const handleGoogleSignUp = useCallback(async () => {
+    setOauthError(null);
+    if (typeof startSSOFlow !== "function") {
+      setOauthError("Google SSO not available");
+      return;
+    }
+    try {
+      const redirectUrl = AuthSession.makeRedirectUri();
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: "oauth_google",
+        redirectUrl,
+      });
+      if (createdSessionId && setActive) {
+        setActive({ session: createdSessionId });
+      }
+    } catch (err: any) {
+      setOauthError(err?.message || "Google sign up failed");
+    }
+  }, [startSSOFlow]);
 
   if (pendingVerification) {
     return (
@@ -162,7 +187,7 @@ const SignUp = () => {
             <TouchableHighlight
               style={[styles.socialButton, styles.googleButton]}
               underlayColor="#e0e0e0"
-              onPress={() => {}}
+              onPress={handleGoogleSignUp}
             >
               <View style={styles.socialButtonContent}>
                 <AntDesign
@@ -176,6 +201,7 @@ const SignUp = () => {
                 </Text>
               </View>
             </TouchableHighlight>
+            {oauthError && <Text style={styles.errorText}>{oauthError}</Text>}
 
             {/* Bottom Login Link */}
             <View style={styles.bottomTextContainer}>
@@ -315,3 +341,5 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
+WebBrowser.maybeCompleteAuthSession();
