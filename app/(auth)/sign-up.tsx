@@ -1,11 +1,12 @@
+import { useClerkSignUp } from "@/hooks/useClerkSignUp";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import React from "react";
-import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Image as RNImage,
   StyleSheet,
   Text,
   TextInput,
@@ -15,126 +16,125 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const SignUp = () => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: { name: "", email: "", password: "" },
-  });
-
   const router = useRouter();
+  const {
+    emailAddress,
+    setEmailAddress,
+    password,
+    setPassword,
+    code,
+    setCode,
+    pendingVerification,
+    onSignUpPress,
+    onVerifyPress,
+    loading,
+    error,
+  } = useClerkSignUp();
 
-  const onSubmit = (data: {
-    name: string;
-    email: string;
-    password: string;
-  }) => {
-    // Handle sign up logic here
-    console.log(data);
+  const [name, setName] = React.useState("");
+  const [nameError, setNameError] = React.useState<string | null>(null);
+
+  // Validate name before sign up
+  const handleSignUp = () => {
+    if (!name || name.trim().length < 2) {
+      setNameError("Name must be at least 2 characters");
+      return;
+    }
+    setNameError(null);
+    onSignUpPress();
   };
+
+  if (pendingVerification) {
+    return (
+      <View style={styles.formContainer}>
+        <Text style={styles.slangCountTitle}>Verify your email</Text>
+        <TextInput
+          style={styles.input}
+          value={code}
+          placeholder="Enter your verification code"
+          onChangeText={setCode}
+          placeholderTextColor="#aaa"
+        />
+        <TouchableHighlight
+          style={styles.button}
+          underlayColor="#2531ba"
+          onPress={onVerifyPress}
+          activeOpacity={0.7}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Verify</Text>
+          )}
+        </TouchableHighlight>
+        {error && <Text style={styles.errorText}>{error}</Text>}
+      </View>
+    );
+  }
 
   return (
     <>
       <Text style={styles.slangCountTitle}>Slang Count</Text>
       <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-        <RNImage
+        <Image
           source={require("../../assets/images/appicon.png")}
           style={styles.avatar}
-          resizeMode="contain"
+          contentFit="contain"
         />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ width: "100%", alignItems: "center" }}
         >
           <View style={styles.formContainer}>
-            <Controller
-              control={control}
-              name="name"
-              rules={{
-                required: "Name is required",
-                minLength: {
-                  value: 2,
-                  message: "Name must be at least 2 characters",
-                },
+            <TextInput
+              style={styles.input}
+              placeholder="Name"
+              autoCapitalize="words"
+              onBlur={() => {
+                if (!name || name.trim().length < 2) {
+                  setNameError("Name must be at least 2 characters");
+                } else {
+                  setNameError(null);
+                }
               }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Name"
-                  autoCapitalize="words"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  placeholderTextColor="#aaa"
-                />
-              )}
+              onChangeText={setName}
+              value={name}
+              placeholderTextColor="#aaa"
             />
-            {errors.name && (
-              <Text style={styles.errorText}>{errors.name.message}</Text>
-            )}
+            {nameError && <Text style={styles.errorText}>{nameError}</Text>}
 
-            <Controller
-              control={control}
-              name="email"
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Enter a valid email address",
-                },
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Email Address"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  placeholderTextColor="#aaa"
-                />
-              )}
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              onChangeText={setEmailAddress}
+              value={emailAddress}
+              placeholderTextColor="#aaa"
             />
-            {errors.email && (
-              <Text style={styles.errorText}>{errors.email.message}</Text>
-            )}
 
-            <Controller
-              control={control}
-              name="password"
-              rules={{
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
-                },
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  secureTextEntry
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  placeholderTextColor="#aaa"
-                />
-              )}
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry
+              onChangeText={setPassword}
+              value={password}
+              placeholderTextColor="#aaa"
             />
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password.message}</Text>
-            )}
 
             <TouchableHighlight
               style={styles.button}
               underlayColor="#2531ba"
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSignUp}
               activeOpacity={0.7}
             >
-              <Text style={styles.buttonText}>Sign Up</Text>
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Sign Up</Text>
+              )}
             </TouchableHighlight>
+            {error && <Text style={styles.errorText}>{error}</Text>}
 
             {/* Separator */}
             <View style={styles.separatorContainer}>

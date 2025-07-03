@@ -1,6 +1,7 @@
+import { useAuth } from "@clerk/clerk-expo";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 import React from "react";
 import { StyleSheet, Text, TouchableHighlight, View } from "react-native";
@@ -8,8 +9,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const Index = () => {
   const router = useRouter();
+  const { isSignedIn } = useAuth();
+
+  if (isSignedIn) {
+    console.log(isSignedIn);
+    return <Redirect href={"/(home)"} />;
+  }
+
   const handleGetStarted = () => {
-    router.navigate("/(auth)/sign-in");
+    router.replace("/(auth)/sign-in");
   };
 
   return (

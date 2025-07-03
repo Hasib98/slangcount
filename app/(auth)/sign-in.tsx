@@ -1,9 +1,8 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Controller, useForm } from "react-hook-form";
+import { Image } from "expo-image";
 import {
   KeyboardAvoidingView,
   Platform,
-  Image as RNImage,
   StyleSheet,
   Text,
   TextInput,
@@ -13,89 +12,58 @@ import {
 
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useClerkSignIn } from "../../hooks/useClerkSignIn";
 
 const SignIn = () => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
-    defaultValues: { email: "", password: "" },
-  });
-
   const router = useRouter();
-
-  const onSubmit = (data: { email: string; password: string }) => {
-    // Handle login logic here
-    console.log(data);
-  };
+  const {
+    emailAddress,
+    setEmailAddress,
+    password,
+    setPassword,
+    onSignInPress,
+    loading,
+    error,
+  } = useClerkSignIn();
 
   return (
     <>
       <Text style={styles.slangCountTitle}>Slang Count</Text>
       <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-        <RNImage
-          source={require("../../assets/images/appicon.png")}
+        <Image
+          source={require("../../assets/images/appicon.svg")}
           style={styles.avatar}
-          resizeMode="contain"
+          contentFit="contain"
         />
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={{ width: "100%", alignItems: "center" }}
         >
           <View style={styles.formContainer}>
-            <Controller
-              control={control}
-              name="email"
-              rules={{
-                required: "Email is required",
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: "Enter a valid email address",
-                },
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Email"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  placeholderTextColor="#aaa"
-                />
-              )}
-            />
-            {errors.email && (
-              <Text style={styles.errorText}>{errors.email.message}</Text>
+            {/* Main Error at Top */}
+            {error && (
+              <View style={styles.topErrorBox}>
+                <Text style={styles.topErrorText}>{error}</Text>
+              </View>
             )}
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              onChangeText={setEmailAddress}
+              value={emailAddress}
+              placeholderTextColor="#aaa"
+            />
 
-            <Controller
-              control={control}
-              name="password"
-              rules={{
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
-                },
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  secureTextEntry
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
-                  placeholderTextColor="#aaa"
-                />
-              )}
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              secureTextEntry
+              onChangeText={setPassword}
+              value={password}
+              placeholderTextColor="#aaa"
             />
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password.message}</Text>
-            )}
 
             {/* Forgot Password Link */}
             <View style={styles.forgotPasswordContainer}>
@@ -112,10 +80,14 @@ const SignIn = () => {
             <TouchableHighlight
               style={styles.button}
               underlayColor="#2531ba"
-              onPress={handleSubmit(onSubmit)}
+              onPress={onSignInPress}
               activeOpacity={0.7}
             >
-              <Text style={styles.buttonText}>Sign In</Text>
+              {loading ? (
+                <Text style={styles.buttonText}>Signing In...</Text>
+              ) : (
+                <Text style={styles.buttonText}>Sign In</Text>
+              )}
             </TouchableHighlight>
 
             {/* Separator */}
@@ -215,10 +187,13 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: "#e74c3c",
-    marginBottom: 8,
-    alignSelf: "flex-start",
-    marginLeft: 10,
+    backgroundColor: "#fdecea",
+    borderRadius: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    marginBottom: 6,
     fontSize: 13,
+    textAlign: "left",
   },
   button: {
     backgroundColor: "#4574f5",
@@ -303,5 +278,22 @@ const styles = StyleSheet.create({
     color: "#5e89ff",
     fontWeight: "bold",
     fontSize: 15,
+  },
+  topErrorBox: {
+    backgroundColor: "#fdecea",
+    borderColor: "#f5c6cb",
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    marginBottom: 18,
+    alignItems: "center",
+    width: 300,
+    alignSelf: "center",
+  },
+  topErrorText: {
+    color: "#e94e3d",
+    fontSize: 15,
+    textAlign: "center",
   },
 });
