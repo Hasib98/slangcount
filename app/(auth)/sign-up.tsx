@@ -6,8 +6,7 @@ import * as WebBrowser from "expo-web-browser";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  Dimensions,
   StyleSheet,
   Text,
   TextInput,
@@ -33,6 +32,12 @@ const SignUp = () => {
   const [nameError, setNameError] = useState<string | null>(null);
   const { handleGoogleSSO, oauthError, oauthLoading, clearOAuthError } =
     useClerkSSO();
+
+  const { width, height } = Dimensions.get("window");
+  const baseFont = Math.max(width * 0.05, 16);
+  const smallFont = Math.max(width * 0.04, 14);
+  const paddingH = Math.max(width * 0.05, 10);
+  const paddingV = Math.max(height * 0.05, 10);
 
   // Validate name before sign up
   const handleSignUp = async () => {
@@ -60,18 +65,32 @@ const SignUp = () => {
 
   return (
     <>
-      <Text style={styles.slangCountTitle}>Slang Count</Text>
-      <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-        <Image
-          source={require("../../assets/images/appicon.png")}
-          style={styles.avatar}
-          contentFit="contain"
-        />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ width: "100%", alignItems: "center" }}
+      <Text
+        style={[
+          styles.slangCountTitle,
+          { fontSize: baseFont, backgroundColor: "transparent" },
+        ]}
+      >
+        Slang Count
+      </Text>
+      <SafeAreaView
+        style={{ flex: 1, alignItems: "center", backgroundColor: "#fff" }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: paddingH,
+            paddingVertical: paddingV,
+          }}
         >
-          <View style={styles.formContainer}>
+          <Image
+            source={require("../../assets/images/appicon.png")}
+            style={[styles.avatar, { height: width * 0.3, width: width * 0.3 }]}
+            contentFit="contain"
+          />
+          <View style={[styles.formContainer, { width: 300, maxWidth: "90%" }]}>
             {/* Main Error at Top */}
             {error && (
               <View style={styles.topErrorBox}>
@@ -84,7 +103,7 @@ const SignUp = () => {
               </View>
             )}
             <TextInput
-              style={styles.input}
+              style={[styles.input, { fontSize: smallFont, width: "100%" }]}
               placeholder="Name"
               autoCapitalize="words"
               onBlur={() => {
@@ -98,10 +117,13 @@ const SignUp = () => {
               value={name}
               placeholderTextColor="#aaa"
             />
-            {nameError && <Text style={styles.errorText}>{nameError}</Text>}
-
+            {nameError && (
+              <Text style={[styles.errorText, { fontSize: smallFont }]}>
+                {nameError}
+              </Text>
+            )}
             <TextInput
-              style={styles.input}
+              style={[styles.input, { fontSize: smallFont, width: "100%" }]}
               placeholder="Email Address"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -109,16 +131,14 @@ const SignUp = () => {
               value={emailAddress}
               placeholderTextColor="#aaa"
             />
-
             <TextInput
-              style={styles.input}
+              style={[styles.input, { fontSize: smallFont, width: "100%" }]}
               placeholder="Password"
               secureTextEntry
               onChangeText={setPassword}
               value={password}
               placeholderTextColor="#aaa"
             />
-
             <TouchableHighlight
               style={styles.button}
               underlayColor="#2531ba"
@@ -128,18 +148,18 @@ const SignUp = () => {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Sign Up</Text>
+                <Text style={[styles.buttonText, { fontSize: smallFont }]}>
+                  Sign Up
+                </Text>
               )}
             </TouchableHighlight>
-
-            {/* Separator */}
             <View style={styles.separatorContainer}>
               <View style={styles.separatorLine} />
-              <Text style={styles.separatorText}>Sign up with</Text>
+              <Text style={[styles.separatorText, { fontSize: smallFont }]}>
+                Sign up with
+              </Text>
               <View style={styles.separatorLine} />
             </View>
-
-            {/* Social Buttons */}
             <TouchableHighlight
               style={[styles.socialButton, styles.appleButton]}
               underlayColor="#222"
@@ -152,7 +172,11 @@ const SignUp = () => {
                   color="#fff"
                   style={{ marginRight: 10 }}
                 />
-                <Text style={styles.socialButtonText}>Continue with Apple</Text>
+                <Text
+                  style={[styles.socialButtonText, { fontSize: smallFont }]}
+                >
+                  Continue with Apple
+                </Text>
               </View>
             </TouchableHighlight>
             <TouchableHighlight
@@ -176,18 +200,23 @@ const SignUp = () => {
                     style={{ marginRight: 10 }}
                   />
                 )}
-                <Text style={[styles.socialButtonText, { color: "#222" }]}>
-                  {oauthLoading ? "Signing up..." : "Continue with Google"}
+                <Text
+                  style={[
+                    styles.socialButtonText,
+                    { color: "#222", fontSize: smallFont },
+                  ]}
+                >
+                  {" "}
+                  {oauthLoading ? "Signing up..." : "Continue with Google"}{" "}
                 </Text>
               </View>
             </TouchableHighlight>
-
-            {/* Bottom Login Link */}
             <View style={styles.bottomTextContainer}>
-              <Text style={styles.bottomText}>
+              <Text style={[styles.bottomText, { fontSize: smallFont }]}>
+                {" "}
                 Already have an account?{" "}
                 <Text
-                  style={styles.loginLink}
+                  style={[styles.loginLink, { fontSize: smallFont }]}
                   onPress={() => router.push("/(auth)/sign-in")}
                 >
                   Login
@@ -195,7 +224,7 @@ const SignUp = () => {
               </Text>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     </>
   );

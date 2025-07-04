@@ -3,8 +3,7 @@ import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
+  Dimensions,
   StyleSheet,
   Text,
   TextInput,
@@ -32,29 +31,50 @@ const SignIn = () => {
   const { handleGoogleSSO, oauthError, oauthLoading, clearOAuthError } =
     useClerkSSO();
 
+  const { width, height } = Dimensions.get("window");
+  const baseFont = Math.max(width * 0.05, 16);
+  const smallFont = Math.max(width * 0.04, 14);
+  const paddingH = Math.max(width * 0.05, 10);
+  const paddingV = Math.max(height * 0.05, 10);
+
   const handleGoogleSignIn = async () => {
     clearOAuthError();
     const success = await handleGoogleSSO();
     if (success) {
       // Navigation will be handled automatically by Clerk
       // The user will be redirected to the home screen
+      router.replace("/(tabs)/home");
     }
   };
 
   return (
     <>
-      <Text style={styles.slangCountTitle}>Slang Count</Text>
-      <SafeAreaView style={{ flex: 1, alignItems: "center" }}>
-        <Image
-          source={require("../../assets/images/appicon.svg")}
-          style={styles.avatar}
-          contentFit="contain"
-        />
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ width: "100%", alignItems: "center" }}
+      <Text
+        style={[
+          styles.slangCountTitle,
+          { fontSize: baseFont, backgroundColor: "transparent" },
+        ]}
+      >
+        Slang Count
+      </Text>
+      <SafeAreaView
+        style={{ flex: 1, alignItems: "center", backgroundColor: "#fff" }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: paddingH,
+            paddingVertical: paddingV,
+          }}
         >
-          <View style={styles.formContainer}>
+          <Image
+            source={require("../../assets/images/appicon.svg")}
+            style={[styles.avatar, { height: width * 0.3, width: width * 0.3 }]}
+            contentFit="contain"
+          />
+          <View style={[styles.formContainer, { width: 300, maxWidth: "90%" }]}>
             {/* Main Error at Top */}
             {error && (
               <View style={styles.topErrorBox}>
@@ -67,7 +87,7 @@ const SignIn = () => {
               </View>
             )}
             <TextInput
-              style={styles.input}
+              style={[styles.input, { fontSize: smallFont, width: "100%" }]}
               placeholder="Email"
               autoCapitalize="none"
               keyboardType="email-address"
@@ -75,20 +95,17 @@ const SignIn = () => {
               value={emailAddress}
               placeholderTextColor="#aaa"
             />
-
             <TextInput
-              style={styles.input}
+              style={[styles.input, { fontSize: smallFont, width: "100%" }]}
               placeholder="Password"
               secureTextEntry
               onChangeText={setPassword}
               value={password}
               placeholderTextColor="#aaa"
             />
-
-            {/* Forgot Password Link */}
             <View style={styles.forgotPasswordContainer}>
               <Text
-                style={styles.forgotPasswordLink}
+                style={[styles.forgotPasswordLink, { fontSize: smallFont }]}
                 onPress={() => {
                   /* TODO: handle forgot password */
                 }}
@@ -96,7 +113,6 @@ const SignIn = () => {
                 Forgot password?
               </Text>
             </View>
-
             <TouchableHighlight
               style={styles.button}
               underlayColor="#2531ba"
@@ -107,18 +123,18 @@ const SignIn = () => {
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <Text style={styles.buttonText}>Sign In</Text>
+                <Text style={[styles.buttonText, { fontSize: smallFont }]}>
+                  Sign In
+                </Text>
               )}
             </TouchableHighlight>
-
-            {/* Separator */}
             <View style={styles.separatorContainer}>
               <View style={styles.separatorLine} />
-              <Text style={styles.separatorText}>or</Text>
+              <Text style={[styles.separatorText, { fontSize: smallFont }]}>
+                or
+              </Text>
               <View style={styles.separatorLine} />
             </View>
-
-            {/* Social Buttons */}
             <TouchableHighlight
               style={[styles.socialButton, styles.appleButton]}
               underlayColor="#222"
@@ -133,7 +149,11 @@ const SignIn = () => {
                   color="#fff"
                   style={{ marginRight: 10 }}
                 />
-                <Text style={styles.socialButtonText}>Continue with Apple</Text>
+                <Text
+                  style={[styles.socialButtonText, { fontSize: smallFont }]}
+                >
+                  Continue with Apple
+                </Text>
               </View>
             </TouchableHighlight>
             <TouchableHighlight
@@ -157,18 +177,23 @@ const SignIn = () => {
                     style={{ marginRight: 10 }}
                   />
                 )}
-                <Text style={[styles.socialButtonText, { color: "#222" }]}>
-                  {oauthLoading ? "Signing in..." : "Continue with Google"}
+                <Text
+                  style={[
+                    styles.socialButtonText,
+                    { color: "#222", fontSize: smallFont },
+                  ]}
+                >
+                  {" "}
+                  {oauthLoading ? "Signing in..." : "Continue with Google"}{" "}
                 </Text>
               </View>
             </TouchableHighlight>
-
-            {/* Bottom Sign Up Link */}
             <View style={styles.bottomTextContainer}>
-              <Text style={styles.bottomText}>
+              <Text style={[styles.bottomText, { fontSize: smallFont }]}>
+                {" "}
                 Don&apos;t have an account?{" "}
                 <Text
-                  style={styles.signUpLink}
+                  style={[styles.signUpLink, { fontSize: smallFont }]}
                   onPress={() => router.push("/(auth)/sign-up")}
                 >
                   Sign up
@@ -176,7 +201,7 @@ const SignIn = () => {
               </Text>
             </View>
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     </>
   );

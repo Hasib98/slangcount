@@ -21,7 +21,7 @@ export function useClerkOTPVerification() {
       });
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(tabs)/home");
         return true;
       } else {
         setError("Verification not complete. Please check your code.");

@@ -23,7 +23,7 @@ export function useClerkSignIn() {
       });
       if (signInAttempt.status === "complete") {
         await setActive({ session: signInAttempt.createdSessionId });
-        router.replace("/(home)");
+        router.replace("/(tabs)/home");
       } else {
         setError("Sign in not complete. Please check your credentials.");
       }

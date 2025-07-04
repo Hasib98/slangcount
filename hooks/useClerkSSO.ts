@@ -1,11 +1,13 @@
 import { useSSO } from "@clerk/clerk-expo";
 import * as AuthSession from "expo-auth-session";
+import { useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 
 export function useClerkSSO() {
   const { startSSOFlow } = useSSO();
   const [oauthError, setOauthError] = useState<string | null>(null);
   const [oauthLoading, setOauthLoading] = useState(false);
+  const router = useRouter();
 
   const handleGoogleSSO = useCallback(async () => {
     setOauthError(null);
@@ -18,17 +20,19 @@ export function useClerkSSO() {
     }
 
     try {
-      const redirectUrl = AuthSession.makeRedirectUri();
       const { createdSessionId, setActive } = await startSSOFlow({
         strategy: "oauth_google",
-        redirectUrl,
+        redirectUrl: AuthSession.makeRedirectUri(),
       });
 
       if (createdSessionId && setActive) {
         await setActive({ session: createdSessionId });
+        // router.replace("/(tabs)/home");
         return true;
+      } else {
+        setOauthError("Additional steps required to complete sign in.");
+        return false;
       }
-      return false;
     } catch (err: any) {
       const errorMessage = err?.message || "Google authentication failed";
       setOauthError(errorMessage);
@@ -36,7 +40,7 @@ export function useClerkSSO() {
     } finally {
       setOauthLoading(false);
     }
-  }, [startSSOFlow]);
+  }, [startSSOFlow, router]);
 
   const clearOAuthError = useCallback(() => {
     setOauthError(null);

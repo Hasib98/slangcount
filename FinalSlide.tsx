@@ -6,7 +6,7 @@ export default function Final() {
   const router = useRouter();
   const finishOnboarding = async () => {
     await AsyncStorage.setItem("onboardingComplete", "true");
-    router.replace("/"); // Go to main app
+    router.replace("/(tabs)/home"); // Go to main app
   };
   return (
     <View className="flex-1 items-center justify-center bg-white">
