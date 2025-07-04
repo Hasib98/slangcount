@@ -12,7 +12,6 @@ const Index = () => {
   const { isSignedIn } = useAuth();
 
   if (isSignedIn) {
-    console.log(isSignedIn);
     return <Redirect href={"/(home)"} />;
   }
 

@@ -1,11 +1,9 @@
 import { useClerkSignUp } from "@/hooks/useClerkSignUp";
-import { useSSO } from "@clerk/clerk-expo";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import * as AuthSession from "expo-auth-session";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -17,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useClerkSSO } from "../../hooks/useClerkSSO";
 
 const SignUp = () => {
   const router = useRouter();
@@ -25,77 +24,39 @@ const SignUp = () => {
     setEmailAddress,
     password,
     setPassword,
-    code,
-    setCode,
-    pendingVerification,
     onSignUpPress,
-    onVerifyPress,
     loading,
     error,
   } = useClerkSignUp();
 
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
-  const [oauthError, setOauthError] = useState<string | null>(null);
-  const { startSSOFlow } = useSSO();
+  const { handleGoogleSSO, oauthError, oauthLoading, clearOAuthError } =
+    useClerkSSO();
 
   // Validate name before sign up
-  const handleSignUp = () => {
+  const handleSignUp = async () => {
     if (!name || name.trim().length < 2) {
       setNameError("Name must be at least 2 characters");
       return;
     }
     setNameError(null);
-    onSignUpPress();
+
+    // Call the sign up function and navigate to OTP screen on success
+    const success = await onSignUpPress();
+    if (success) {
+      router.push("/(auth)/otp-verification");
+    }
   };
 
-  const handleGoogleSignUp = useCallback(async () => {
-    setOauthError(null);
-    if (typeof startSSOFlow !== "function") {
-      setOauthError("Google SSO not available");
-      return;
+  const handleGoogleSignUp = async () => {
+    clearOAuthError();
+    const success = await handleGoogleSSO();
+    if (success) {
+      // Navigation will be handled automatically by Clerk
+      // The user will be redirected to the home screen
     }
-    try {
-      const redirectUrl = AuthSession.makeRedirectUri();
-      const { createdSessionId, setActive } = await startSSOFlow({
-        strategy: "oauth_google",
-        redirectUrl,
-      });
-      if (createdSessionId && setActive) {
-        setActive({ session: createdSessionId });
-      }
-    } catch (err: any) {
-      setOauthError(err?.message || "Google sign up failed");
-    }
-  }, [startSSOFlow]);
-
-  if (pendingVerification) {
-    return (
-      <View style={styles.formContainer}>
-        <Text style={styles.slangCountTitle}>Verify your email</Text>
-        <TextInput
-          style={styles.input}
-          value={code}
-          placeholder="Enter your verification code"
-          onChangeText={setCode}
-          placeholderTextColor="#aaa"
-        />
-        <TouchableHighlight
-          style={styles.button}
-          underlayColor="#2531ba"
-          onPress={onVerifyPress}
-          activeOpacity={0.7}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.buttonText}>Verify</Text>
-          )}
-        </TouchableHighlight>
-        {error && <Text style={styles.errorText}>{error}</Text>}
-      </View>
-    );
-  }
+  };
 
   return (
     <>
@@ -111,6 +72,17 @@ const SignUp = () => {
           style={{ width: "100%", alignItems: "center" }}
         >
           <View style={styles.formContainer}>
+            {/* Main Error at Top */}
+            {error && (
+              <View style={styles.topErrorBox}>
+                <Text style={styles.topErrorText}>{error}</Text>
+              </View>
+            )}
+            {oauthError && (
+              <View style={styles.topErrorBox}>
+                <Text style={styles.topErrorText}>{oauthError}</Text>
+              </View>
+            )}
             <TextInput
               style={styles.input}
               placeholder="Name"
@@ -159,7 +131,6 @@ const SignUp = () => {
                 <Text style={styles.buttonText}>Sign Up</Text>
               )}
             </TouchableHighlight>
-            {error && <Text style={styles.errorText}>{error}</Text>}
 
             {/* Separator */}
             <View style={styles.separatorContainer}>
@@ -188,20 +159,28 @@ const SignUp = () => {
               style={[styles.socialButton, styles.googleButton]}
               underlayColor="#e0e0e0"
               onPress={handleGoogleSignUp}
+              disabled={oauthLoading}
             >
               <View style={styles.socialButtonContent}>
-                <AntDesign
-                  name="google"
-                  size={24}
-                  color="#222"
-                  style={{ marginRight: 10 }}
-                />
+                {oauthLoading ? (
+                  <ActivityIndicator
+                    size="small"
+                    color="#222"
+                    style={{ marginRight: 10 }}
+                  />
+                ) : (
+                  <AntDesign
+                    name="google"
+                    size={24}
+                    color="#222"
+                    style={{ marginRight: 10 }}
+                  />
+                )}
                 <Text style={[styles.socialButtonText, { color: "#222" }]}>
-                  Continue with Google
+                  {oauthLoading ? "Signing up..." : "Continue with Google"}
                 </Text>
               </View>
             </TouchableHighlight>
-            {oauthError && <Text style={styles.errorText}>{oauthError}</Text>}
 
             {/* Bottom Login Link */}
             <View style={styles.bottomTextContainer}>
@@ -339,6 +318,23 @@ const styles = StyleSheet.create({
   loginLink: {
     color: "#5e89ff",
     fontWeight: "bold",
+  },
+  topErrorBox: {
+    backgroundColor: "#fdecea",
+    borderColor: "#f5c6cb",
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    marginBottom: 18,
+    alignItems: "center",
+    width: 300,
+    alignSelf: "center",
+  },
+  topErrorText: {
+    color: "#e94e3d",
+    fontSize: 15,
+    textAlign: "center",
   },
 });
 

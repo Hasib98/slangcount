@@ -18,6 +18,10 @@ export default function AuthRoutesLayout() {
         name="sign-in"
         options={{ headerShown: false, animation: "slide_from_left" }}
       />
+      <Stack.Screen
+        name="otp-verification"
+        options={{ headerShown: false, animation: "slide_from_right" }}
+      />
     </Stack>
   );
 }

@@ -6,7 +6,6 @@ export default function HomeScreen() {
   const { isLoaded, user } = useUser();
   const { signOut } = useAuth();
   const router = useRouter();
-  console.log(user?.emailAddresses);
 
   const handleSignOut = async () => {
     await signOut();

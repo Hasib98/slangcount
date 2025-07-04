@@ -1,6 +1,8 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { Image } from "expo-image";
+import * as WebBrowser from "expo-web-browser";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -13,6 +15,7 @@ import {
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useClerkSignIn } from "../../hooks/useClerkSignIn";
+import { useClerkSSO } from "../../hooks/useClerkSSO";
 
 const SignIn = () => {
   const router = useRouter();
@@ -25,6 +28,18 @@ const SignIn = () => {
     loading,
     error,
   } = useClerkSignIn();
+
+  const { handleGoogleSSO, oauthError, oauthLoading, clearOAuthError } =
+    useClerkSSO();
+
+  const handleGoogleSignIn = async () => {
+    clearOAuthError();
+    const success = await handleGoogleSSO();
+    if (success) {
+      // Navigation will be handled automatically by Clerk
+      // The user will be redirected to the home screen
+    }
+  };
 
   return (
     <>
@@ -44,6 +59,11 @@ const SignIn = () => {
             {error && (
               <View style={styles.topErrorBox}>
                 <Text style={styles.topErrorText}>{error}</Text>
+              </View>
+            )}
+            {oauthError && (
+              <View style={styles.topErrorBox}>
+                <Text style={styles.topErrorText}>{oauthError}</Text>
               </View>
             )}
             <TextInput
@@ -82,9 +102,10 @@ const SignIn = () => {
               underlayColor="#2531ba"
               onPress={onSignInPress}
               activeOpacity={0.7}
+              disabled={loading}
             >
               {loading ? (
-                <Text style={styles.buttonText}>Signing In...</Text>
+                <ActivityIndicator color="#fff" />
               ) : (
                 <Text style={styles.buttonText}>Sign In</Text>
               )}
@@ -101,7 +122,9 @@ const SignIn = () => {
             <TouchableHighlight
               style={[styles.socialButton, styles.appleButton]}
               underlayColor="#222"
-              onPress={() => {}}
+              onPress={() => {
+                /* TODO: implement Apple Sign In */
+              }}
             >
               <View style={styles.socialButtonContent}>
                 <AntDesign
@@ -116,17 +139,26 @@ const SignIn = () => {
             <TouchableHighlight
               style={[styles.socialButton, styles.googleButton]}
               underlayColor="#e0e0e0"
-              onPress={() => {}}
+              onPress={handleGoogleSignIn}
+              disabled={oauthLoading}
             >
               <View style={styles.socialButtonContent}>
-                <AntDesign
-                  name="google"
-                  size={24}
-                  color="#222"
-                  style={{ marginRight: 10 }}
-                />
+                {oauthLoading ? (
+                  <ActivityIndicator
+                    size="small"
+                    color="#222"
+                    style={{ marginRight: 10 }}
+                  />
+                ) : (
+                  <AntDesign
+                    name="google"
+                    size={24}
+                    color="#222"
+                    style={{ marginRight: 10 }}
+                  />
+                )}
                 <Text style={[styles.socialButtonText, { color: "#222" }]}>
-                  Continue with Google
+                  {oauthLoading ? "Signing in..." : "Continue with Google"}
                 </Text>
               </View>
             </TouchableHighlight>
@@ -151,6 +183,8 @@ const SignIn = () => {
 };
 
 export default SignIn;
+
+WebBrowser.maybeCompleteAuthSession();
 
 const styles = StyleSheet.create({
   avatar: {
