@@ -4,7 +4,7 @@
     "slug": "slangcount",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/appicon2.png",
+    "icon": "./assets/images/icon.png",
     "scheme": "slangcount",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -38,9 +38,7 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      [
-        "react-native-bottom-tabs"
-      ],
+      ["react-native-bottom-tabs"],
       [
         "expo-build-properties",
         {
