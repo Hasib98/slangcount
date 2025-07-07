@@ -19,7 +19,8 @@
         "foregroundImage": "./assets/images/ios-icon-light.svg",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.smhasib.slangcount"
     },
     "web": {
       "bundler": "metro",
@@ -37,7 +38,9 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      ["react-native-bottom-tabs"],
+      [
+        "react-native-bottom-tabs"
+      ],
       [
         "expo-build-properties",
         {
@@ -51,6 +54,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1e61c14e-24a4-4e26-96db-74be84791e24"
+      }
     }
   }
 }

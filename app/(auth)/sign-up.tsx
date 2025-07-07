@@ -58,8 +58,8 @@ const SignUp = () => {
     clearOAuthError();
     const success = await handleGoogleSSO();
     if (success) {
-      // Navigation will be handled automatically by Clerk
       // The user will be redirected to the home screen
+      router.replace("/(tabs)/home");
     }
   };
 
